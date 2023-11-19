@@ -12,7 +12,7 @@ continuously read data and compare with set value
 - temp&humidity
   
   - output: PD2
-- 
+  
 - photoresistor
   
   - ADC
