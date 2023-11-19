@@ -1,38 +1,39 @@
-# final_repo
- Final repository for ESE-5190
+# ESE-5190 Smart Devices Final Project
+Final Repository for ESE-5190 Smart Devices
 
-### 1 clock
+## Overview
+This repository contains the final project for ESE-5190. It is about a smart curtain opener and includes various components like a clock, environmental sensors, servo motor control, and more, all integrated with an UNO R3 and an ESP32.
 
-- 0:00-11:59 计时
-  
-  - timer1
-  
-- 是否可以通过esp32连接网络时间
+## Components
 
-### 2 enviroment sensor
+### 1. Clock
+- **Timing**: 0:00 - 11:59
+- **Features**:
+  - `timer1` for precise timing.
+  - Integration with ESP32 for network time synchronization (TBD).
 
-continuously read data and compare with set value
+### 2. Environmental Sensor
+- **Functionality**: Continuously monitors and compares environmental data against set thresholds.
+- **Sensors**:
+  - Temperature & Humidity:
+    - Input: `D2 (PD2)`
+  - Photoresistor:
+    - Type: ADC
+    - Input: `A0 (PC0)`
 
-- temp&humidity
-  
-  - Input: PD2
-  
-- photoresistor
-  
-  - ADC
-  
-  - Input: A0 (PC0)
+### 3. Servo Motor Control
+- **Mode**: Timer0 phase-correct mode
+- **Output**: `PD6`
 
-### 3 servo motor control
+### 4. Fan/Air Conditioner Control
+- Controls DC motor for fan/air conditioner operations.
 
-- timer0 phase correct mode
-  
-- output: PD6
-  
-### 4 fan/ air conditioner
+### 5. Communication with ESP32
+- Details of communication protocols and methods with ESP32.
 
-- dc motor
-  
-### 5 commute with Esp32
+### 6. ESP32 & Blynk Integration
+- Integration details with Blynk app for remote monitoring and control.
 
-### 6 ESP32 & Blynk
+## Getting Started
+(Include instructions on how to set up and run the project.)
+
