@@ -31,8 +31,30 @@ This repository contains the final project for ESE-5190. It is about a smart cur
 ### 5. Communication with ESP32
 - Details of communication protocols and methods with ESP32.
 
+#### 5.1 UART
+
+#### 5.2 SPI
+- Master: Atmega 328P
+
+- Atmega Pin:
+  - SCK - `13`
+  - MISO - `12`
+  - MOSI - `11`
+  - CS / SS - `10`
+
+- Slave: ESP32 (use ESP32SPISLAVE library)
+
+- ESP32 Pin:
+  - SCK - `GPIO 5`
+  - MISO - `GPIO 21`
+  - MOSI - `GPIO 19`
+  - CS / SS - `GPIO 33`
+
 ### 6. ESP32 & Blynk Integration
 - Integration details with Blynk app for remote monitoring and control.
+
+- OPEN Button(`V0`) on -> GPIO `13` on -> Atmega `PB1`
+- CLOSE Button(`V1`) on -> GPIO `12` on -> Atmega `PB0`
 
 ## Getting Started
 (Include instructions on how to set up and run the project.)
