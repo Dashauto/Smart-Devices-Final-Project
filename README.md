@@ -32,7 +32,17 @@ This repository contains the final project for ESE-5190. It is about a smart cur
 - Details of communication protocols and methods with ESP32.
 
 #### 5.1 UART
+- **Mode**: 2 stop bits, 8 data bits, no parity bits
+- Atmega Pin:
+  - TX - `TX`
+  - RX - `RX`
+  - GND - `GND`
 
+- ESP32 Pin:  
+  - TX - `GPIO 7`
+  - RX - `GPIO 8`
+  - GND - `GND`
+  
 #### 5.2 SPI
 - Master: Atmega 328P
 
