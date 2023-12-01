@@ -18,7 +18,11 @@
 
 
 char String[25];
-unsigned char receivedData = 0;
+char rx_String[25];
+char receivedData = 0;
+int rx_finish;
+int buffer_index = 0;
+int rx_trigger = 0;
 
 void UART_init(void)
 {
@@ -33,7 +37,8 @@ void UART_init(void)
 	UCSR0C |= (1<<USBS0);
 	UCSR0C |= (3<<UCSZ00);
 	
-	UCSR0B |= RXCIE0;
+	//UCSR0B |= RXCIE0;
+	UCSR0B |= (1 << RXCIE0);
 	sei();
 }
 
@@ -54,21 +59,26 @@ void UART_putstr(char* StringPtr)
 	}
 }
 
+/*
 unsigned char USART_Receive(void)
 {
-	/* Wait for data to be received */
+	// Wait for data to be received 
 	while (!(UCSR0A & (1<<RXC0)))
 	;
-	/* Get and return received data from buffer */
+	// Get and return received data from buffer 
 	return UDR0;
 }
-/*
+*/
+///*
 ISR(USART_RX_vect) {
 	receivedData = UDR0; // Read the received data
-	// Add code here to handle the received data
-	PORTB &= ~(1 << PORTB5);
+	rx_trigger = 1;
+	
+	//sprintf(String,"data: %c\r\n", receivedData);
+	//UART_putstr(String);
+	
 }
-*/
+//*/
 int main(void)
 {
 	UART_init();
@@ -78,20 +88,52 @@ int main(void)
 
 	while(1)
 	{
-		// Print to terminal
-		//sprintf(String,"Hello again world! \n");
-		//UART_putstr(String);
-		char h = 0;
-		h = USART_Receive();
-		if (h == 'H')
+		if (rx_trigger)
 		{
-			PORTB ^= (1 << PORTB5);
+			if((char) receivedData != '\n' && buffer_index < 24)
+			{
+				rx_String[buffer_index] = receivedData;
+				buffer_index++;
+				//sprintf(String,rx_String);
+				//UART_putstr(String);
+				//sprintf(String,"%d", buffer_index);
+				//UART_putstr(String);
+			}
+			else
+			{
+				rx_String[buffer_index] = '\0'; // Null-terminate the string
+				buffer_index = 0; // Reset buffer index for the next message
+				rx_finish = 1;
+				//sprintf(String,"finish: %d\r\n", rx_finish);
+				//UART_putstr(String);
+				_delay_ms(50);
+			}
+			receivedData = 0;
+			rx_trigger = 0;
 		}
+		
+		// Print to terminal
+		if (rx_finish)
+		{
+			rx_finish = 0;
+			//if (rx_String[0] == 'L' && rx_String[4] == ':')
+			//{
+				sprintf(String,"D;14:15\n");
+				UART_putstr(String);
+			//}
+		}
+		//char h = 0;
+		//h = USART_Receive();
+		//if (h == 'H')
+		//{
+			//PORTB ^= (1 << PORTB5);
+		//}
 		//int hi = 0;
 		
 		//_delay_ms(1000);
 	}
 }
+
 
 
 
