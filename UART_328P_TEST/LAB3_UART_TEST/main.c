@@ -59,6 +59,14 @@ void UART_putstr(char* StringPtr)
 	}
 }
 
+//void rx_data_handling()
+//{
+	//if (rx_String[0] == 'A')
+	//{
+		//
+	//}
+//}
+
 /*
 unsigned char USART_Receive(void)
 {
@@ -74,10 +82,10 @@ ISR(USART_RX_vect) {
 	receivedData = UDR0; // Read the received data
 	rx_trigger = 1;
 	
-	//sprintf(String,"data: %c\r\n", receivedData);
-	//UART_putstr(String);
 	
 }
+	
+
 //*/
 int main(void)
 {
@@ -90,6 +98,8 @@ int main(void)
 	{
 		if (rx_trigger)
 		{
+			//sprintf(String,"data: %c\r\n", receivedData);
+			//UART_putstr(String);
 			if((char) receivedData != '\n' && buffer_index < 24)
 			{
 				rx_String[buffer_index] = receivedData;
@@ -106,31 +116,19 @@ int main(void)
 				rx_finish = 1;
 				//sprintf(String,"finish: %d\r\n", rx_finish);
 				//UART_putstr(String);
-				_delay_ms(50);
+				_delay_us(1);
 			}
 			receivedData = 0;
 			rx_trigger = 0;
 		}
 		
-		// Print to terminal
 		if (rx_finish)
 		{
 			rx_finish = 0;
-			//if (rx_String[0] == 'L' && rx_String[4] == ':')
-			//{
-				sprintf(String,"D;14:15\n");
-				UART_putstr(String);
-			//}
+			sprintf(String,rx_String);
+			UART_putstr(String);
 		}
-		//char h = 0;
-		//h = USART_Receive();
-		//if (h == 'H')
-		//{
-			//PORTB ^= (1 << PORTB5);
-		//}
-		//int hi = 0;
-		
-		//_delay_ms(1000);
+
 	}
 }
 
