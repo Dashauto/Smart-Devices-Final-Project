@@ -5,6 +5,8 @@ bool newData = false;
 char buffer[25];
 int buff_ptr = 0;
 unsigned int count = 0;
+int hour = 13;
+int minute = 25;
 
 void setup() {
   // Start the hardware serial port for debug messages
@@ -17,10 +19,13 @@ void setup() {
 
 void loop() {
   // Send a message to Atmega328P
+  sprintf(buffer,"E%c%c\n", (char) (32 + hour), (char) (32 + minute));
+  Serial1.print(buffer);
+  delay(50);/*
   Serial1.write("a07\n");
   delay(50);
   Serial1.write("a10\n");
-  delay(50);
+  delay(50);*/
   // Check if the Atmega328P has sent a message
   
   while (Serial1.available() > 0) {
