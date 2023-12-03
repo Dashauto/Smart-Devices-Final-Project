@@ -28,6 +28,10 @@ This repository contains the final project for ESE-5190. It is about a smart cur
 ### 4. Fan/Air Conditioner Control
 - Controls DC motor for fan/air conditioner operations.
 
+- DC motor
+  - '+' : `PD3`
+  - '-' : `GND`
+
 ### 5. Communication with ESP32
 - Details of communication protocols and methods with ESP32.
 
@@ -62,9 +66,6 @@ This repository contains the final project for ESE-5190. It is about a smart cur
 
 ### 6. ESP32 & Blynk Integration
 - Integration details with Blynk app for remote monitoring and control.
-
-- OPEN Button(`V0`) on -> GPIO `13` on -> Atmega `PB1`
-- CLOSE Button(`V1`) on -> GPIO `12` on -> Atmega `PB0`
 
 ## Getting Started
 (Include instructions on how to set up and run the project.)
