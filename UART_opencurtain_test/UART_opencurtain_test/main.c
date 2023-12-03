@@ -25,12 +25,31 @@ int rx_finish;
 int buffer_index = 0;
 int rx_trigger = 0;
 
-int user_open = 0;
-int user_close = 0;
-int user_air_open = 0;
-int user_air_close = 0;
-int curtain_decision = 0;
-int AC_decision = 0;
+volatile uint8_t user_open = 0;
+volatile uint8_t user_close = 0;
+volatile uint8_t user_air_open = 0;
+volatile uint8_t user_air_close = 0;
+
+volatile uint8_t time_open = 0;
+volatile uint8_t time_open_hour = 0;
+volatile uint8_t time_open_minute = 0;
+volatile uint8_t time_close = 0;
+volatile uint8_t time_close_hour = 0;
+volatile uint8_t time_close_minute = 0;
+
+volatile uint8_t last_temp = 0;
+volatile uint8_t temp_on = 0;
+volatile uint8_t temp_close = 0;
+volatile uint8_t temp_on_val = 0;
+volatile uint8_t temp_close_val = 0;
+volatile uint8_t current_time = 0;
+
+
+int set_current_time = 0;
+
+
+volatile uint8_t curtain_decision = 0;
+volatile uint8_t AC_decision = 0;
 
 
 volatile int duty_cycle = 0;
@@ -50,6 +69,27 @@ volatile uint8_t humidity, temperature;
 
 
 void rx_data_handling();
+
+void flag_init() {
+	user_open = 0;
+	user_close = 0;
+	user_air_open = 0;
+	user_air_close = 0;
+
+	time_open = 0;
+	time_open_hour = 0;
+	time_open_minute = 0;
+	time_close = 0;
+	time_close_hour = 0;
+	time_close_minute = 0;
+
+	temp_on = 0;
+	temp_close = 0;
+	current_time = 0;
+
+	set_current_time = 0;
+}
+
 
 void UART_init()
 {
@@ -79,7 +119,8 @@ void UART_putstr(char* StringPtr)
 	}
 }
 
-ISR(USART_RX_vect) {
+ISR(USART_RX_vect) 
+{
 	receivedData = UDR0; // Read the received data
 	rx_trigger = 1;
 	
@@ -88,7 +129,8 @@ ISR(USART_RX_vect) {
 	
 }
 
-void DHT11_start(void) {
+void DHT11_start(void) 
+{
 	DDRD |= (1 << DHT11_PIN); // Set pin as output
 	PORTD &= ~(1 << DHT11_PIN); // Pull pin low
 	_delay_ms(20); // Wait for 20ms
@@ -97,7 +139,8 @@ void DHT11_start(void) {
 	DDRD &= ~(1 << DHT11_PIN); // Set pin as input
 }
 
-uint8_t DHT11_check_response(void) {
+uint8_t DHT11_check_response(void) 
+{
 	uint8_t response = 0;
 	_delay_us(40);
 	if (!(PIND & (1 << DHT11_PIN))) {
@@ -108,7 +151,8 @@ uint8_t DHT11_check_response(void) {
 	return response;
 }
 
-uint8_t DHT11_read_data(void) {
+uint8_t DHT11_read_data(void) 
+{
 	uint8_t i, j;
 	uint8_t data = 0;
 	for (j = 0; j < 8; j++) {
@@ -137,6 +181,9 @@ void readHandt()
 		temperature = DHT11_read_data();
 		// Process or display the temperature and humidity
 		sprintf(String, "Y%c%c\n", (char) (humidity + 32), (char) (temperature + 32));
+		UART_putstr(String);
+
+		sprintf(String, "X%c%c\n", (char) (hours + 32), (char) (minutes + 32));
 		UART_putstr(String);
 	}
 }
@@ -195,6 +242,7 @@ ISR(TIMER1_COMPA_vect) {
 	//}
 //}
 
+// Air-conditioner a.k.a DC motor
 void AC_control(int on)
 {
 	if (on) 
@@ -211,53 +259,68 @@ void AC_control(int on)
 
 void rx_data_handling()
 {
+
+    // open curtain button
 	if (rx_String[0] == 'A')
 	{
 		user_open = 1;
 	}
+	// close curtain button
 	else if (rx_String[0] == 'B')
 	{
 		user_close = 1;
 	}
+	// open A/C button
 	else if (rx_String[0] == 'C')
 	{
-		user_air_open = 1;
+		user_air_open = !user_air_open;
 	}
+	// close A/C button
 	else if (rx_String[0] == 'D')
 	{
 		user_air_close = 1;
 	}
+	// set time to open curtain
 	else if (rx_String[0] == 'E')
 	{
-		user_air_close = 1;
+		time_open = 1;
+		time_open_hour = (int) (rx_String[1] - 32);
+		time_open_minute = (int) (rx_String[2] - 32);
 	}
+	// set time to close curtain
 	else if (rx_String[0] == 'F')
 	{
-		user_air_close = 1;
+		time_close = 1;
+		time_close_hour = (int) (rx_String[1] - 32);
+		time_close_minute = (int) (rx_String[2] - 32);
 	}
+	// set temperature to open A/C
 	else if (rx_String[0] == 'G')
 	{
-		user_air_close = 1;
+		temp_on = 1;
+		temp_on_val = ((int) rx_String[1] -48) * 10 + (int) rx_String[2] -48;
 	}
+	// set temperature to close A/C
 	else if (rx_String[0] == 'H')
 	{
-		user_air_close = 1;
+		temp_close = 1;
+		temp_close_val += ((int) rx_String[1] -48) * 10 + (int) rx_String[2] - 48;	
 	}
+	// set current time
 	else if (rx_String[0] == 'I')
 	{
-		user_air_close = 1;
+		set_current_time = 1;
 	}
+	// make smart decision (curatin)
 	else if (rx_String[0] == 'J')
 	{
-		curtain_decision = 1;
+		curtain_decision = !curtain_decision;
 	}
+	// make smart decision (A/C)
 	else if (rx_String[0] == 'K')
 	{
-		AC_decision = 1;
+		AC_decision = !AC_decision;
 	}
-	
-	
-	
 }
 
 void Initialization()
@@ -321,6 +384,47 @@ ISR(ADC_vect)
 	ADC_interrupt = 1;
 }
 
+void open_close_time()
+{
+	if (time_open && !curtain_open)
+	{
+		//_delay_us(1);
+		//sprintf(String, "X%c%c\n", (char) (hours + 32), (char) (minutes + 32));
+		//UART_putstr(String);
+
+		if(hours == time_open_hour && minutes == time_open_minute)
+		{
+			OCR0A = 80 * 2;
+			time_open = 0;
+
+			// Reset the timer ticks
+			timer1_ticks = 0;
+			
+			// toggle curtain_open
+			curtain_open = !curtain_open;
+		}
+	}
+	else if (time_close && curtain_open)
+	{
+		//_delay_us(1);
+		//sprintf(String, "X%c%c\n", (char) (hours + 32), (char) (minutes + 32));
+		//UART_putstr(String);
+
+		if(hours == time_close_hour && minutes == time_close_minute)
+		{
+			OCR0A = 106 * 2;
+			time_close = 0;
+
+			// Reset the timer ticks
+			timer1_ticks = 0;
+			
+			// toggle curtain_open
+			curtain_open = !curtain_open;
+		}
+	}
+	
+}
+
 int main(void)
 {
 	cli();
@@ -332,36 +436,96 @@ int main(void)
 	sei();
 	while (1)
 	{
-		if (HT_record >= 15)
+
+		
+		if (timer1_ticks >= 5)
+		{
+			// set OCR0A to 93*2
+			OCR0A = 93*2;
+			//flag_init();
+		}
+		if (HT_record >= 5)
 		{
 			readHandt();
 			HT_record = 0;
 		}
-		if (temperature > 0)
+		
+		// control air-conditioner based on different user inputs
+		
+		if (AC_decision && temperature >= 25)
+		{
+			AC_control(1);
+		} 
+		else if ((!AC_decision) && user_air_open)
 		{
 			AC_control(1);
 		}
+		else if((!AC_decision) && temp_on && (temperature >= temp_on_val))
+		{
+			AC_control(1);
+		}
+		else
+		{
+			AC_control(0);
+			temp_on = 0;
+		}
+		
+		/*if(user_air_open) 
+			AC_control(1);
+		else 
+			AC_control(0);
+
+		if (AC_decision)
+		{
+			if (temperature >= 25 && !user_air_open)
+			{
+				AC_control(1);
+			}
+			else
+			{
+				AC_control(0);
+			}
+			
+		}
+		else
+		{
+			
+			    	
+			if (temp_on)
+			{
+				if(temperature >= temp_on_val && ) 
+					AC_control(1);
+				
+				else if(temp_close && temperature <= temp_close_val) 
+					AC_control(0);
+
+				else
+				{
+					AC_control(0);
+					temp_on = 0;
+					temp_close = 0;
+				}
+			}
+			
+			
+
+		}*/
+		
+
+
 		
 		if (rx_trigger)
 		{
-			//sprintf(String,"data: %c\r\n", receivedData);
-			//UART_putstr(String);
 			if((char) receivedData != '\n' && buffer_index < 24)
 			{
 				rx_String[buffer_index] = receivedData;
 				buffer_index++;
-				//sprintf(String,rx_String);
-				//UART_putstr(String);
-				//sprintf(String,"%d", buffer_index);
-				//UART_putstr(String);
 			}
 			else
 			{
 				rx_String[buffer_index] = '\0'; // Null-terminate the string
 				buffer_index = 0; // Reset buffer index for the next message
 				rx_finish = 1;
-				//sprintf(String,"finish: %d\r\n", rx_finish);
-				//UART_putstr(String);
 				_delay_us(1);
 			}
 			receivedData = 0;
@@ -373,43 +537,50 @@ int main(void)
 			rx_data_handling();
 			//sprintf(String, "receivedData: %c%c%c\r\n", rx_String[0], rx_String[1], rx_String[2]);
 			//UART_putstr(String);
-			
+			sprintf(String, "Temp: %d temp_on: %d RT: %d\r\n", temp_on_val, temp_on, temperature);
+			UART_putstr(String);
+
+			//if (user_open && !curtain_decision && !curtain_open)
 			if (user_open && !curtain_open)
 			{
 				OCR0A = 80 * 2;
-
-				// Reset the timer ticks if needed
-				//sec_cnt = 0;
-				//timer2_ticks = 0;
-				timer1_ticks = 0;
 				user_open = 0;
+
+				// Reset the timer ticks
+				timer1_ticks = 0;
+				
 				// toggle curtain_open
 				curtain_open = !curtain_open;
 			}
-			if (user_close && curtain_open)
+			//else if (user_close && !curtain_decision && curtain_open)
+			else if (user_close && curtain_open)
 			{
 				OCR0A = 106 * 2;
 				user_close = 0;
 
-				// Reset the timer ticks if needed
-				//sec_cnt = 0;
-				//timer2_ticks = 0;
+				// Reset the timer ticks
 				timer1_ticks = 0;
 
 				// toggle curtain_open
 				curtain_open = !curtain_open;
 			}
+			if (set_current_time) {
+				hours = (int) rx_String[1] - 32;
+				minutes = (int) rx_String[2] - 32;
+				seconds = 0;
+				_delay_us(1);
+				sprintf(String, "X%c%c\n", (char) (hours + 32), (char) (minutes + 32));
+				UART_putstr(String);
+				set_current_time = 0;
+			}
 
 			// if reaches 5 seconds;
-			if (timer1_ticks >= 5)
-			{
-				// set OCR0A tp 93*2
-				OCR0A = 93*2;
-			}
 			
 		}
 		
-		if (ADC_interrupt)
+		open_close_time();
+		
+		if (curtain_decision && ADC_interrupt)
 		{
 			//sprintf(String, "ADC: %u  sec_cnt: %u  OCR0A: %u User_open: %d receivedData: %c\r\n",ADC, sec_cnt,OCR0A, user_open, receivedData);
 			//UART_putstr(String);
@@ -420,22 +591,17 @@ int main(void)
 			{
 				OCR0A = 80 * 2;
 
-                // Reset the timer ticks if needed
-				//sec_cnt = 0;
-				//timer2_ticks = 0;
+                // Reset the timer ticks
 				timer1_ticks = 0;
-				user_open = 0;
+				
 				// toggle curtain_open
 				curtain_open = !curtain_open;
 			}
 			else if (ADC <= 300 && curtain_open)
 			{
 				OCR0A = 106 * 2;
-				user_close = 0;
 
-				// Reset the timer ticks if needed
-				//sec_cnt = 0;
-				//timer2_ticks = 0;
+				// Reset the timer ticks
 				timer1_ticks = 0;
 
 				// toggle curtain_open
@@ -443,13 +609,16 @@ int main(void)
 			}
 
 			// if reaches 5 seconds;
-			if (timer1_ticks >= 5) 
-			{
-				// set OCR0A tp 93*2
-				OCR0A = 93*2;	 
-			}
+			// if (timer1_ticks >= 5) 
+			// {
+			// 	// set OCR0A to 93*2
+			// 	OCR0A = 93*2;	 
+			// }
 					
 		}
 	}
 }
+
+
+
 
