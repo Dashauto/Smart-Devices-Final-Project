@@ -67,6 +67,27 @@ This repository contains the final project for ESE-5190. It is about a smart cur
 ### 6. ESP32 & Blynk Integration
 - Integration details with Blynk app for remote monitoring and control.
 
-## Getting Started
-(Include instructions on how to set up and run the project.)
+## Self-Designed Communication Protocol
+After a series of designs and tests, we found out that Atmega328P can only receive 4 Bytes of data at once under interrupt mode.
+
+Beacause of time emergency, we do not have enough time to do more test, as a result, we need to embrace this fact. That means we need to use only 4 byte of data to create a very short and efficient communication protocol.
+
+There are 13 instructions below we need for this task:
+
+- A. Open curtain
+- B. Close curtain
+- C. Toggle condition of air-conditioner
+- E. Set time to open curtain
+- F. Set time to close curtain
+- G. Set temperature to open air-conditioner
+- H. set temperature to close air-conditioner
+- I. set current time
+- J. Smart decision swith for curtain
+- K. Smart decision swith for air-conditioner
+- X. Current time 
+- Y. Current temperature and humidity 
+
+Since the way we describe protocol is by 4 Bytes of data, the first one shall be instruction identifier, and the last one shall be ending identifier.
+
+In this case, we only have 2 Bytes to transmit data. Luckily, 2 Bytes are enough for our purpose.
 
