@@ -68,7 +68,7 @@ This repository contains the final project for ESE-5190. It is about a smart cur
 - Integration details with Blynk app for remote monitoring and control.
 
 ## Self-Designed Communication Protocol
-After a series of designs and tests, we found out that Atmega328P can only receive 4 Bytes of data at once under interrupt mode.
+After a series of designs and tests, we found out that Atmega328P can only receive 4 Bytes of data at once under interrupt mode. eg, `buffer[4]`
 
 Beacause of time emergency, we do not have enough time to do more test, as a result, we need to embrace this fact. That means we need to use only 4 byte of data to create a very short and efficient communication protocol.
 
@@ -87,7 +87,12 @@ There are 13 instructions below we need for this task:
 - X. Current time 
 - Y. Current temperature and humidity 
 
-Since the way we describe protocol is by 4 Bytes of data, the first one shall be instruction identifier, and the last one shall be ending identifier.
+Since the way we describe protocol is by 4 Bytes of data, eg, `buffer[4]`, the first one shall be instruction identifier, and the last one shall be ending identifier.
 
 In this case, we only have 2 Bytes to transmit data. Luckily, 2 Bytes are enough for our purpose.
+
+First, for instructions A, B, C, J, K, these 5 instructions only transmit on/off signal, don't need to include data part.
+
+Then, for instructions G, H, Y, these 3 instructions need to send temperature and humidty data
+- The second entry of the transmission buffer, eg, `buffer[2]` will include 
 
