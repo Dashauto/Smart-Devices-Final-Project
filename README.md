@@ -70,29 +70,42 @@ This repository contains the final project for ESE-5190. It is about a smart cur
 ## Self-Designed Communication Protocol
 After a series of designs and tests, we found out that Atmega328P can only receive 4 Bytes of data at once under interrupt mode. eg, `buffer[4]`
 
-Beacause of time emergency, we do not have enough time to do more test, as a result, we need to embrace this fact. That means we need to use only 4 byte of data to create a very short and efficient communication protocol.
+Beacause of time constrain, we do not have enough time to do more test, as a result, we need to embrace this fact. That means we need to use only 4 byte of data to create a very short and efficient communication protocol.
 
-There are 13 instructions below we need for this task:
+### Protocol Structure
+- **Buffer Size:** 4 Bytes (`buffer[4]`)
+- **Buffer Composition:**
+  - `buffer[0]`: Instruction Identifier
+  - `buffer[1]`: Data Byte 1 (if needed)
+  - `buffer[2]`: Data Byte 2 (if needed)
+  - `buffer[3]`: Ending Identifier
 
-- A. Open curtain
-- B. Close curtain
-- C. Toggle condition of air-conditioner
-- E. Set time to open curtain
-- F. Set time to close curtain
-- G. Set temperature to open air-conditioner
-- H. set temperature to close air-conditioner
-- I. set current time
-- J. Smart decision swith for curtain
-- K. Smart decision swith for air-conditioner
-- X. Current time 
-- Y. Current temperature and humidity 
+### Instructions Set (13 Total)
+1. **A:** Open curtain
+2. **B:** Close curtain
+3. **C:** Toggle air-conditioner
+4. **E:** Set time to open curtain
+5. **F:** Set time to close curtain
+6. **G:** Set temperature to open air-conditioner
+7. **H:** Set temperature to close air-conditioner
+8. **I:** Set current time
+9. **J:** Smart decision switch for curtain
+10. **K:** Smart decision switch for air-conditioner
+11. **X:** Current time
+12. **Y:** Current temperature and humidity
 
-Since the way we describe protocol is by 4 Bytes of data, eg, `buffer[4]`, the first one shall be instruction identifier, and the last one shall be ending identifier.
+### Instruction Categories
+- **On/Off Signal Instructions (A, B, C, J, K):** Do not require additional data.
+- **Temperature and Humidity Instructions (G, H, Y):**
+  - `buffer[2]`: Humidity data (int to char + 32 for visibility)
+  - `buffer[3]`: Temperature data (int to char + 32 for visibility)
+- **Time Transmit Instructions (E, F, I, X):**
+  - `buffer[2]`: Hour data (int to char + 32 for visibility)
+  - `buffer[3]`: Minute data (int to char + 32 for visibility)
 
-In this case, we only have 2 Bytes to transmit data. Luckily, 2 Bytes are enough for our purpose.
+### Data Representation
+- Data in `int` format is converted to `char + 32`. This is for debugging purposes, as ASCII codes become visible starting from 32.
 
-First, for instructions A, B, C, J, K, these 5 instructions only transmit on/off signal, don't need to include data part.
 
-Then, for instructions G, H, Y, these 3 instructions need to send temperature and humidty data
-- The second entry of the transmission buffer, eg, `buffer[2]` will include 
+
 
