@@ -7,7 +7,7 @@ This repository contains the final project for ESE-5190. It is about a smart cur
 ## Components
 
 ### 1. Clock
-- **Timing**: 0:00 - 11:59
+- **Timing**: 0:00 - 23:59
 - **Features**:
   - `timer1` for precise timing.
   - Integration with ESP32 for network time synchronization (TBD).
@@ -84,15 +84,17 @@ Beacause of time constrain, we do not have enough time to do more test, as a res
 1. **A:** Open curtain
 2. **B:** Close curtain
 3. **C:** Toggle air-conditioner
-4. **E:** Set time to open curtain
-5. **F:** Set time to close curtain
-6. **G:** Set temperature to open air-conditioner
-7. **H:** Set temperature to close air-conditioner
-8. **I:** Set current time
-9. **J:** Smart decision switch for curtain
-10. **K:** Smart decision switch for air-conditioner
-11. **X:** Current time
-12. **Y:** Current temperature and humidity
+4. **D:** Not used
+5. **E:** Set time to open curtain
+6. **F:** Set time to close curtain
+7. **G:** Set temperature to open air-conditioner
+8. **H:** Set temperature to close air-conditioner
+9. **I:** Set current time
+10. **J:** Smart decision switch for curtain
+11. **K:** Smart decision switch for air-conditioner
+12. **X:** Current time
+13. **Y:** Current temperature and humidity
+14. **Z:** Not Used
 
 ### Instruction Categories
 - **On/Off Signal Instructions (A, B, C, J, K):** Do not require additional data.
